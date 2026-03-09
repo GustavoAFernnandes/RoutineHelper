@@ -1,0 +1,30 @@
+este projeto é um desenvolvimento academico e de estudo sobre Clean architeture
+pode conter MVVM mas ainda se é dado como apenas um experimento, 
+
+
+|-> IDEIA
+esse projeto se consiste na ideia de ajudar a organizar o meu dinheiro pessoal
+com "widget" na tela principal do meu celular, com uma metrica gasta daquele dia
+"?/50", os valores apresentados são colocados pelo propio usuario de uma forma 
+simples e intuitiva, sem a necessidade de digitar numeros ou textos bla bla bla
+a forma mais eficiente seria "compartilhar" o comprovante da compra para o app
+dai ele irá ler e salvar só o valor de transação, adicionando os valores pagos
+daquele dia a sua informação daquele dia.
+
+|-> LAWS
+1 - de facil manuzeio 
+2 - nunca guardar dados intimos
+
+|-> Tecnologias
+Provider -> gerenciamento de estado e injeção de dependencia (clean architeture)
+home_widget -> criar widgets na tela
+receive_charing_intent -> para meu app aparecer na busca de compartilhar imagens
+google_ml_kit_text_recognition -> transformar imagem em texto
+sqflite -> salvar localmente o valor e dia 
+|-> outros
+syncfusion_flutter_pdf retorna 100% do valor certo se for pdf de banco
+
+
+|-> links
+widget em tela
+https://codelabs.developers.google.com/flutter-home-screen-widgets?hl=pt-br#1
