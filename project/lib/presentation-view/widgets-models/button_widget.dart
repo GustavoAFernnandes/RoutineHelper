@@ -1,35 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:project/presentation-view/state/buttonState.dart';
 import 'package:project/presentation-view/widgets-models/button_model.dart';
 import 'package:provider/provider.dart';
 
-class MyWidget extends StatefulWidget {
-  const MyWidget({super.key});
+class ButtonWidget extends StatefulWidget {
+  const ButtonWidget({super.key});
 
   @override
-  State<MyWidget> createState() => _MyWidgetState();
+  State<ButtonWidget> createState() => _ButtonWidgetState();
 }
 
-class _MyWidgetState extends State<MyWidget> {
-  bool loading = false;
-  Future beginOCR() async {
-    setState(() => loading = true);
-    await Future.delayed(const Duration(seconds: 10));
-    setState(() => loading = false);
-    return true;
-  }
-
+class _ButtonWidgetState extends State<ButtonWidget> {
+  late Buttonstate provider = context.watch<Buttonstate>();
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(value: 
     
-    ,
-    child: ,
-    )
-    ButtonModel(
+    return  ButtonModel(
       height: 50,
       width: 300,
-      onTap: () => beginOCR(),
-      isLoading: loading,
+      onTap: () => provider.beginOCR(),
+      isLoading: provider.loading,
     );
+    
   }
 }
