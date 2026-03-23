@@ -11,15 +11,14 @@ class ButtonWidget extends StatefulWidget {
 }
 
 class _ButtonWidgetState extends State<ButtonWidget> {
-  late Buttonstate provider = context.watch<Buttonstate>();
   @override
   Widget build(BuildContext context) {
     
     return  ButtonModel(
       height: 50,
       width: 300,
-      onTap: () => provider.beginOCR(),
-      isLoading: provider.loading,
+      onTap: context.read<Buttonstate>().beginOCR,
+      isLoading: context.watch<Buttonstate>().loading,
     );
     
   }

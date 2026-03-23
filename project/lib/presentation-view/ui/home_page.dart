@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:project/data-model/use_cases/getImageImp.dart';
-import 'package:project/data-model/use_cases/readImageImp.dart';
+import 'package:project/data-model/use_cases/OCR/getImageImp.dart';
+import 'package:project/data-model/use_cases/OCR/readImageImp.dart';
 import 'package:project/presentation-view/providers/buttonProvider.dart';
 import 'package:project/presentation-view/state/buttonState.dart';
 import 'package:project/presentation-view/widgets-models/button_widget.dart';
@@ -20,15 +20,12 @@ class _HomePageState extends State<HomePage> {
       home: Scaffold(
         body: Container(
           child: Center(
-            child: ChangeNotifierProvider(
-              create: (context) => Buttonstate(
-                getimageUseCase: context.read<Getimageimp>(),
-                readImageUseCase: context.read<ReadImageImp>(),
-              ),  
-              builder: (context, child) =>  ButtonProvider(widget: ButtonWidget()),            ),
+            child: ButtonWidget(),
+            
           ),
         ),
       ),
     );
   }
 }
+

@@ -6,7 +6,7 @@ import 'package:project/domain-viewModel/use_cases/OCR/readImage.dart';
 
 class ReadImageImp implements ReadImage{
   @override
-  Future<Either<BeginOCRFailure, String>> call({required String  path}) async {
+  Future<Either<BeginOCRFailure, RecognizedText>> call({required String  path}) async {
      TextRecognizer T = TextRecognizer(script: TextRecognitionScript.latin);
       
 
@@ -22,9 +22,10 @@ class ReadImageImp implements ReadImage{
           text += "${line.text}\n";
         }
       }
-      return Right(text);
+      T.close();
+      return Right(recognisedText);
     } catch (e) {
-     
+      T.close();
       return Left(BeginOCRFailure(e.toString()));
       
     } 

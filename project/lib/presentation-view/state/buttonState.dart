@@ -1,27 +1,32 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:project/domain-viewModel/use_cases/OCR/beginOCR.dart';
 import 'package:project/domain-viewModel/erros/OCR/failure.dart';
-import 'package:project/domain-viewModel/use_cases/OCR/getImage.dart';
-import 'package:project/domain-viewModel/use_cases/OCR/readImage.dart';
 
 class Buttonstate extends ChangeNotifier {
-  Getimage getimageUseCase;
-  ReadImage readImageUseCase;
+  final BeginOCR beginOCRUseCase;
 
-  late bool _loading;
+   bool _loading = false;
 
   bool get loading => _loading;
 
-  Buttonstate({required this.getimageUseCase, required this.readImageUseCase});
-  void beginOCR(){
-
+  Buttonstate({required this.beginOCRUseCase});
+  Future<void> beginOCR() async {
+    print('Iniciando OCR');
     _loading = true;
     notifyListeners();
-    String path = getimageUseCase.call(source: ImageSource.gallery ) as String;
+    print('Loading set to true');
 
-    final lerImagem = readImageUseCase.call(path: path );
-
+    final result = await beginOCRUseCase.call(source: ImageSource.gallery);
+    result.fold(
+      (failure) {
+        print('Erro: ${failure.message}');
+      },
+      (value) {
+        print('Valor encontrado: $value');
+      },
+    );
     _loading = false;
     notifyListeners();
   }
