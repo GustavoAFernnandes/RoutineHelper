@@ -27,7 +27,7 @@ class BeginOCRImp implements BeginOCR {
             final findResult = await findValue.call(recognizedText: recognizedText);
             return findResult.fold(
               (failure) => Left(BeginOCRFailure(failure.message)),
-              (value) => Right(value),
+              (value) => Right(value.toString()),
             );
           },
         );
