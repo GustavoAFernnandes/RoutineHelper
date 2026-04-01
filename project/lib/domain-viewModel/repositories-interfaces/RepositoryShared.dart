@@ -1,3 +1,6 @@
+import 'package:project/domain-viewModel/entities/ImageShared.dart';
+
 abstract class Repositoryshared {
-  //TODO: Implementar parte abstrada
+  Stream<ImageShared> watchSharedImages();
+  Future<ImageShared?> getInitialImage();
 }

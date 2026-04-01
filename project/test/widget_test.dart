@@ -7,24 +7,28 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:project/data-model/datasources/ShareDataSource.dart';
+import 'package:project/data-model/repositories/SharedFile/ShareRepositoryImpl.dart';
 
 import 'package:project/main.dart';
-
+import 'package:share_handler/share_handler.dart';
+// AQUI ESTÁ A DEFINIÇÃO QUE FALTAVA:
+class MockSharedatasource extends Mock implements Sharedatasource {}
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  test('Deve converter SharedMedia em SharedContent com sucesso', () async {
+    // 1. Criamos um Mock do DataSource (simulando o plugin)
+    final mockDataSource = MockSharedatasource();
+    final repository = ShareRepositoryImpl(mockDataSource);
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // 2. Simulamos o plugin enviando uma imagem
+    final fakeMedia = SharedMedia(attachments: [SharedAttachment(path: 'foto.jpg', type: SharedAttachmentType.image)]);
+    when(() =>mockDataSource.shareStream).thenAnswer((_) => Stream.value(fakeMedia));
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // 3. Executamos o método do repositório
+    final result = await repository.watchSharedImages().first;
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // 4. Verificamos se o path chegou certo
+    expect(result.filePath, 'foto.jpg');
   });
 }

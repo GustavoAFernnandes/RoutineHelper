@@ -7,30 +7,30 @@ import 'package:project/domain-viewModel/erros/OCR/failure.dart';
 import 'package:project/domain-viewModel/repositories-interfaces/RepositoryOCR.dart';
 
 class RepositoryOCRImp implements RepositoryOCR {
-  
   @override
-  Future<Either<GetImageFailure, String>> GetImage({required ImageSource source}) async {
-     try {
+  Future<Either<GetImageFailure, String>> GetImage({
+    required ImageSource source,
+  }) async {
+    try {
       ImagePicker imagePicker = ImagePicker();
       final pickedImage = await imagePicker.pickImage(source: source);
       return Right(pickedImage!.path);
     } catch (e) {
       return Left(GetImageFailure(e.toString()));
     }
-    
   }
 
   @override
-  Future<Either<ReadFailure, RecognizedText>> Read({required String path}) async {
-   TextRecognizer T = TextRecognizer(script: TextRecognitionScript.latin);
-      
+  Future<Either<ReadFailure, RecognizedText>> Read({
+    required String path,
+  }) async {
+    TextRecognizer T = TextRecognizer(script: TextRecognitionScript.latin);
 
     try {
       final inputImage = InputImage.fromFilePath(path);
-      final RecognizedText recognisedText =
-          await T.processImage(inputImage);
+      final RecognizedText recognisedText = await T.processImage(inputImage);
 
-      String text ="";
+      String text = "";
 
       for (TextBlock block in recognisedText.blocks) {
         for (TextLine line in block.lines) {
@@ -42,12 +42,13 @@ class RepositoryOCRImp implements RepositoryOCR {
     } catch (e) {
       T.close();
       return Left(ReadFailure(e.toString()));
-      
-    } 
+    }
   }
 
   @override
-  Future<Either<FailureFindValue, double>> findValue({required RecognizedText recognizedText}) async {
+  Future<Either<FailureFindValue, double>> findValue({
+    required RecognizedText recognizedText,
+  }) async {
     // Regex que busca "Total", "Valor Total" ou "Soma", seguido de R$ e o valor
     // (?i) torna a busca case-insensitive (total ou TOTAL)
     // \s* aceita espaços variáveis
@@ -79,19 +80,19 @@ class RepositoryOCRImp implements RepositoryOCR {
       }
       print(recognizedText.text);
       try {
-      
-      final matches = RegExp(
-        r'R\$\s?(\d{1,3}(?:\.\d{3})*,\d{2})',
-      ).allMatches(recognizedText.text);
-      if (matches.isNotEmpty) {
-        final ultimoValor = matches.last.group(1);
-        return Right(double.parse(ultimoValor!.replaceAll('.', '').replaceAll(',', '.')));
-       
-      }
+        final matches = RegExp(
+          r'R\$\s?(\d{1,3}(?:\.\d{3})*,\d{2})',
+        ).allMatches(recognizedText.text);
+        if (matches.isNotEmpty) {
+          final ultimoValor = matches.last.group(1);
+          return Right(
+            double.parse(ultimoValor!.replaceAll('.', '').replaceAll(',', '.')),
+          );
+        }
       } catch (e) {
         print("Erro ao procurar valor: $e");
       }
-      
+
       return Left(
         FailureFindValue("Campo 'Valor Total' não encontrado no texto."),
       );
@@ -99,26 +100,71 @@ class RepositoryOCRImp implements RepositoryOCR {
       return Left(FailureFindValue(e.toString()));
     }
   }
-  
-  @override
-  Future<Either<BeginOCRFailure, String>> beginOCR({required ImageSource source}) async {
-   final imageResult = await GetImage.call(source: source);
-    return imageResult.fold(
-      (failure) => Left(BeginOCRFailure(failure.message)),
-      (path) async {
-        final readResult = await Read.call(path: path);
-        return readResult.fold(
-          (failure) => Left(BeginOCRFailure(failure.message)),
-          (recognizedText) async {
-            final findResult = await findValue.call(recognizedText: recognizedText);
-            return findResult.fold(
-              (failure) => Left(BeginOCRFailure(failure.message)),
-              (value) => Right(value.toString()),
-            );
-          },
-        );
-      },
-    );
+
+  Future<String> lerTextoDoPath(String caminhoDoArquivo) async {
+    // 1. Instanciar o reconhecedor (use o script latino para português)
+    final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+
+    try {
+      // 2. Criar o InputImage diretamente do path que você já possui
+      final inputImage = InputImage.fromFilePath(caminhoDoArquivo);
+
+      // 3. Processar a imagem
+      final RecognizedText recognizedText = await textRecognizer.processImage(
+        inputImage,
+      );
+
+      // 4. Retornar o texto completo
+      return recognizedText.text;
+    } catch (e) {
+      return "Erro ao processar OCR: $e";
+    } finally {
+      // 5. Sempre fechar o recognizer para liberar memória
+      textRecognizer.close();
+    }
   }
-  
+
+  @override
+  Future<Either<BeginOCRFailure, String>> beginOCR({
+    ImageSource? source,
+    String? path,
+  }) async {
+    if (source != null && path == null) {
+      final imageResult = await GetImage.call(source: source);
+      return imageResult.fold(
+        (failure) => Left(BeginOCRFailure(failure.message)),
+        (path) async {
+          final readResult = await Read.call(path: path);
+          return readResult.fold(
+            (failure) => Left(BeginOCRFailure(failure.message)),
+            (recognizedText) async {
+              final findResult = await findValue.call(
+                recognizedText: recognizedText,
+              );
+              return findResult.fold(
+                (failure) => Left(BeginOCRFailure(failure.message)),
+                (value) => Right(value.toString()),
+              );
+            },
+          );
+        },
+      );
+    } else if (source == null && path != null) {
+      final readResult = await Read.call(path: path);
+      return readResult.fold(
+        (failure) => Left(BeginOCRFailure(failure.message)),
+        (recognizedText) async {
+          final findResult = await findValue.call(
+            recognizedText: recognizedText,
+          );
+          return findResult.fold(
+            (failure) => Left(BeginOCRFailure(failure.message)),
+            (value) => Right(value.toString()),
+          );
+        },
+      );
+    } else {
+      return Left(BeginOCRFailure("Nenhuma fonte de imagem fornecida."));
+    }
+  }
 }
