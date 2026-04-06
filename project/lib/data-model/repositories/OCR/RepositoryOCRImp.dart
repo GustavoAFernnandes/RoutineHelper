@@ -3,6 +3,8 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 import 'package:google_mlkit_text_recognition/src/text_recognizer.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_picker_platform_interface/src/types/image_source.dart';
+import 'package:project/data-model/entities/LabelTextModel.dart';
+import 'package:project/data-model/use_cases/atualizarWidget.dart';
 import 'package:project/domain-viewModel/erros/OCR/failure.dart';
 import 'package:project/domain-viewModel/repositories-interfaces/RepositoryOCR.dart';
 
@@ -38,6 +40,7 @@ class RepositoryOCRImp implements RepositoryOCR {
         }
       }
       T.close();
+
       return Right(recognisedText);
     } catch (e) {
       T.close();
@@ -78,13 +81,22 @@ class RepositoryOCRImp implements RepositoryOCR {
           }
         }
       }
-      print(recognizedText.text);
       try {
         final matches = RegExp(
           r'R\$\s?(\d{1,3}(?:\.\d{3})*,\d{2})',
         ).allMatches(recognizedText.text);
         if (matches.isNotEmpty) {
           final ultimoValor = matches.last.group(1);
+          // Atualiza o widget com o valor encontrado
+          Labeltextmodel labelWidget = Labeltextmodel();
+          labelWidget.labelText = ultimoValor!
+              .replaceAll('.', '')
+              .replaceAll(',', '.');
+          AtualizarwidgetImp().atualizarWidget(
+            labelWidget.labelText,
+            labelWidget.labelTitleDate,
+          );
+
           return Right(
             double.parse(ultimoValor!.replaceAll('.', '').replaceAll(',', '.')),
           );
