@@ -1,7 +1,8 @@
-class Task {
+class Dia {
   final int? id;
   final DateTime date;
-  final String value;
+  final double value;
+  final int? mes_id;
 
-  Task({this.id, required this.date, required this.value});
+  Dia({required this.id, required this.date, required this.value, required this.mes_id, });
 }

@@ -2,6 +2,6 @@
 import '../entities/Task.dart';
 
 abstract class ITaskRepository {
-  Future<void> addTask(Task task);
-  Future<List<Task>> getAllTasks();
+  Future<void> addTask(Dia task);
+  Future<List<Dia>> getDays();
 }

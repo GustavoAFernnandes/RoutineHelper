@@ -3,6 +3,7 @@ import 'dart:developer' as Developer show log;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:project/data-model/entities/DiaModel.dart';
 import 'package:project/domain-viewModel/entities/Task.dart';
 import 'package:project/domain-viewModel/repositories-interfaces/RepositoryDataBase.dart';
 import 'package:project/domain-viewModel/use_cases/OCR/beginOCR.dart';
@@ -32,28 +33,25 @@ class Buttonstate extends ChangeNotifier {
         );
       },
       (value) async {
-        database.addTask(Task(date: DateTime.now(), value: value));
+        database.addTask(DiaModel(date: DateTime.now(), value: double.parse(value), mes_id: null));
         Developer.log(name: "OCR", 'Valor encontrado: $value');
 
-        try {
           // Chama o repositório
-          final tasks = await database.getAllTasks();
+          final days = await database.getDays();
 
-          if (tasks.isEmpty) {
+          if (days.isEmpty) {
             print("--- Nenhuma tarefa encontrada no SQLite ---");
             return;
           }
 
           print("--- LISTANDO TAREFAS DO BANCO ---");
-          for (var task in tasks) {
+          for (var day in days) {
             print(
-              "ID: ${task.id} | Título: ${task.date} | Valor: R\$ ${task.value}",
+              "ID: ${day.id.toString()} | Título: ${day.date.toString()} | Valor: R\$ ${day.value.toString() } | Mês: ${day.mes_id.toString()}",
             );
           }
           print("---------------------------------");
-        } catch (e) {
-          print("Erro ao listar tarefas: $e");
-        }
+        
       },
     );
 
